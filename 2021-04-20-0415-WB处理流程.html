@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>WB &#x56FE;&#x50CF;&#x5904;&#x7406;</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, system-ui, 'Source Han Sans SC', 'Source Han Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="wb-图像处理">WB 图像处理</h1>
+<h2 id="软件环境">软件环境</h2>
+<h3 id="gimp"><a href="https://www.gimp.org">GIMP</a></h3>
+<p>在2021年4月20日，最新版是 2.10.24 。</p>
+<h3 id="imagej-nih-github">ImageJ (<a href="https://imagej.nih.gov/ij/">NIH</a>, <a href="https://github.com/imagej/imagej1">GitHub</a>)</h3>
+<p><a href="https://imagej.nih.gov/ij/download.html">NIH Downloads</a>，选择 Platform Independent 的就好，自己去下载 JRE 去，亲测 JRE 11 似乎支持的样子。当然也可以选择自己平台对应的下载项。</p>
+<p>在 2021年4月20日，最新版是 v153 。</p>
+<h2 id="tanonimage-gelcap">TanonImage GelCap</h2>
+<ul>
+<li>保存时选择 High-bit TIFF 得到的文件，或者从 AutoSave 文件夹里面扒出来的 TIF ，都是原图；</li>
+<li>GelCap 上面调节的只是显示范围，只有在保存为 8-bit TIFF 时才能保存屏幕上的显示效果；</li>
+<li>GelCap 可以实现不同曝光图像的叠加（但是我不会）</li>
+<li>Auto 曝光时时间测定是以红框内为准的。双击清除红框，可以重选红框实现更准确的 Auto 曝光测定</li>
+</ul>
+<ol>
+<li>先拍明场照片</li>
+<li>然后选好红框区域到膜的区域</li>
+<li>可以单张拍摄
+<ol>
+<li>Auto 曝光</li>
+<li>保存原图</li>
+<li>自己调整图像显示，保存几张 8-bit 图片</li>
+</ol>
+</li>
+<li>也可以连续拍摄
+<ol>
+<li>建议等时间间距，加上基础曝光时间</li>
+<li>然后叠加显示</li>
+<li>保存的时候选择 Multi-page TIFF ，再选择 High-bit TIFF ，就是原图了</li>
+<li>同样可以自己调整显示后，保存 8-bit 图片</li>
+</ol>
+</li>
+</ol>
+<h2 id="gimp-rotate--crop-to-selection">GIMP Rotate &amp; Crop to selection</h2>
+<ol>
+<li>显示水平参考线
+<ol>
+<li>View -&gt; Show Grid ，直接显示网格</li>
+<li>或者从Ruler上面拖一条参考线下来（最后通过 Image -&gt; Guides -&gt; Remove all Guides 来清除掉）</li>
+</ol>
+</li>
+<li>Tools -&gt; Transform Tools -&gt; Rotate ( or <code>Shift-R</code> )</li>
+<li>Tools -&gt; Selection Tools -&gt; Rectangle Select ( or <code>R</code> )，选择条带+背景区域</li>
+<li>Image -&gt; Crop to Selection，得到旋转与裁剪后的膜的图像</li>
+<li>全部复制到 Word 里面，再去裁剪出条带</li>
+</ol>
+<h2 id="gimp-brightness--contrast">GIMP Brightness &amp; Contrast</h2>
+<ol>
+<li>最好是先把图像切到只有膜</li>
+<li>可以打开 Histogram ( Windows -&gt; Dockable Dialogs -&gt; Histogram )</li>
+<li>Colors -&gt; Brightness-Contrast</li>
+<li>Edit these Settings as Levels</li>
+<li>All Channels - Auto Input Levels ，或者自己手动调节显示范围</li>
+<li>之后可以手动调节一下 Output Levels</li>
+<li>可以通过 Split View ，同时比较处理前与处理后图像的变化情况</li>
+<li>Click <code>OK</code></li>
+</ol>
+<h2 id="imagej-半定量分析-wb-条带">ImageJ （半）定量分析 WB 条带</h2>
+<h3 id="bugs">Bugs</h3>
+<ul>
+<li>似乎这里的 Integrated Density 是对白色进行积分的，而我们的条带目前是白背景黑条带。这里的结果就……十分的反直觉。同时，采样精度大概也不一定是 full 16-bit （凝胶成像是 14~15 bits ，发光成像似乎是 16-bit ），这计算结果就必定涉及到背景与条带的相减才能得到线性的关系，同时得保证积分区域大小要一样。</li>
+</ul>
+<ol>
+<li>建议先切好图片，记得保留作为背景的空白区域</li>
+<li>先 File -&gt; Open ，或者直接把图片拖进主窗口，当状态栏显示了<code>&lt;&lt; Drag and Drop &gt;&gt;</code>的时候放手就好</li>
+<li>Process -&gt; Subtract Background =&gt; Click <code>OK</code>
+<ul class="contains-task-list">
+<li>Rolling ball radius: <strong>~50.0</strong> pixels</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Light background</li>
+</ul>
+</li>
+<li>Analyze -&gt; Set Measurements =&gt; Click <code>OK</code>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Area</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Mean gray value</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Min &amp; max gray value</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Integrated density</li>
+</ul>
+</li>
+<li>Click <code>*Rectangle* Selection</code> / <code>*Oval* Selection</code> on the toolbar</li>
+<li>圈出条带</li>
+<li>Analyze -&gt; Measure ( <code>Ctrl-M</code> or <code>M</code> )</li>
+<li>圈出背景，同样步骤测量。需要注意条带、背景的区域需要一样大。</li>
+<li>在 Results 窗口中，复制数据到 Excel ，或者直接 File -&gt; Save as ，导出为 CSV</li>
+<li>计算时，以 <code>IntDen</code> (Integrated Density) 字段为条带灰度值积分。需要扣除背景灰度值。由于测量结果似乎是白色的积分我也没有办法，只能用背景去减条带了。</li>
+<li>最后，将蛋白与参比蛋白的灰度值积分相除就行了，就得到了对参比蛋白归一化情况下蛋白的含量数据。这两种蛋白圈选区域不一样大似乎也没关系。</li>
+<li>ZQY 推荐用 GraphpadPrism 进行数据分析。</li>
+</ol>
+<h2 id="gimp-colorize--merge-伪彩合成-pseudo-color-overlay-">GIMP Colorize &amp; Merge （伪彩合成 Pseudo-Color Overlay ）</h2>
+<ol>
+<li>这个得用原图，不能切，不能旋转（大概可以先把其他地方背景给删掉？）
+<ol>
+<li>先 Rectangle Select</li>
+<li>再 Select -&gt; Invert ( <code>Ctrl-I</code> )</li>
+<li>Edit -&gt; Clear（ <code>Delete</code> ）/ Edit -&gt; Fill with BG Color ( <code>Ctrl+.</code> )</li>
+</ol>
+</li>
+<li>先处理一下 Brightness-Contrast</li>
+<li>Image -&gt; Mode -&gt; RGB ( ensure the image is in RGB mode )</li>
+<li>Colors -&gt; Colorize</li>
+<li>点击 Color 后面的颜色块，选择需要的颜色（比如 #e884f7 ）</li>
+<li>调节 Lightness ，一般大于 0 ，在 0.5 左右，让颜色不是出现在背景上，以及深色部分不要是黑色</li>
+<li>Click <code>OK</code></li>
+<li>Color -&gt; Color to Alpha</li>
+<li>Click <code>OK</code></li>
+<li>把背景拖到 Layers 里面去，调整图层顺序，就可以导出了。</li>
+</ol>
+
+    </body>
+    </html>
